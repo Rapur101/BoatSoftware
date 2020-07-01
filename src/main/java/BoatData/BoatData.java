@@ -1,3 +1,5 @@
+package BoatData;
+
 public class BoatData {
     private String securityCode;
     private int boatNr;
