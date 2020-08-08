@@ -1,6 +1,5 @@
 import BoatData.BoatData;
 import BoatData.DataValidator;
-import ConnectionModule.RestClient;
 
 /**
  * Main starting class.
@@ -29,10 +28,10 @@ public class BoatyFloatMain {
                 throw new IllegalArgumentException("Boat number is not valid!");
             else if (!DataValidator.validSecurityCode(args[1]))
                 throw new IllegalArgumentException("Security code is not valid!");
-            else if (!DataValidator.validIpAddress(args[2]))
+            else if (!DataValidator.validAPI(args[2]))
                 throw new IllegalArgumentException("API address is not valid!");
 
-            Runner runner = new Runner(new BoatData(Integer.parseInt(args[0]), args[1]), new RestClient(args[2]));
+            Runner runner = new Runner(new BoatData(Integer.parseInt(args[0]), args[1], args[2]));
             runner.bootUp();
 
         } catch (IllegalArgumentException illegalArgumentException) {

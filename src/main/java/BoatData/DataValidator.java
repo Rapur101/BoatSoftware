@@ -2,6 +2,8 @@ package BoatData;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
+import java.net.URL;
+
 /**
  * Simple Validator class, that check for valid user input, when initializing software.
  */
@@ -19,8 +21,7 @@ public class DataValidator {
      */
     public static boolean validSecurityCode(final String securityCode) {
         if (securityCode.length() != 40) return false;
-        else if (securityCode.contains(" ")) return false;
-        else return securityCode.replaceAll("[a-z][A-Z][0-9]", "").length() == 0;
+        else return !securityCode.contains(" ");
     }
 
     /**
@@ -37,12 +38,19 @@ public class DataValidator {
     }
 
     /**
-     * Server ipAddress validator method as 0.1-a1.
+     * API address validator method as 0.1-a1.
      * Returns a boolean value.
-     * @param ipAddress String that will be validated.
-     * @return True if number is valid, false otherwise.
+     * @param apiAddress String that will be validated.
+     * @return True if URL is valid, false otherwise.
      */
-    public static boolean validIpAddress(final String ipAddress) {
-        return InetAddressUtils.isIPv4Address(ipAddress);
+    public static boolean validAPI(final String apiAddress) {
+        try {
+            new URL(apiAddress).toURI();
+            return true;
+        }
+
+        catch (Exception e) {
+            return false;
+        }
     }
 }
