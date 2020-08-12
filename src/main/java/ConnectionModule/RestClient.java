@@ -1,51 +1,68 @@
 package ConnectionModule;
 
+import org.apache.http.entity.StringEntity;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.Arrays;
 
 
 // TODO: 25/06/2020 - Multithreading
 
+/**
+ * Basic REST Client class.
+ */
 public class RestClient {
-    private String serverUri;
+    private URL apiAddress;
     private RestTemplate rest;
     private HttpHeaders httpHeaders;
     private HttpStatus httpStatus;
 
-    public RestClient(String serverUri) {
-        this.serverUri = serverUri;
+    /**
+     * Constructor.
+     *
+     * @param apiAddress   API URL
+     * @param securityCode Encrypted securityCode.
+     */
+    public RestClient(URL apiAddress, String securityCode) {
+        this.apiAddress = apiAddress;
         this.rest = new RestTemplate();
         this.httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-Type", "application/json");
-        httpHeaders.add("Accept", "*/*");
+
+        httpHeaders.add("securityCode", securityCode);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    /*
-    public void postJson() throws IOException {
-        CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(uri);
 
-        String json = "test"; // TODO: 25/06/2020
-        StringEntity stringEntity = new StringEntity(json);
-        httpPost.setEntity(stringEntity);
-        httpPost.setHeader("Accept","application/json");
-        httpPost.setHeader("Content-type","application/json");
-
-        CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpPost);
-        closeableHttpClient.close();
-    }*/
-
-    public String httpGet(String uri, String body) {
-        HttpEntity<String> requestEntity = new HttpEntity<String>(body, httpHeaders);
-        ResponseEntity<String> responseEntity = rest.exchange(serverUri + uri, HttpMethod.GET, requestEntity, String.class);
+    /**
+     * Basic HTTP GET method.
+     *
+     * @param uri URI to request information.
+     * @return Response body. Auth error, if securityCode doesn't match.
+     */
+    public String httpGet(String uri) {
+        HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
+        ResponseEntity<String> responseEntity =  rest.exchange(apiAddress + uri, HttpMethod.GET, requestEntity, String.class);
         setHttpStatus(responseEntity.getStatusCode());
         return responseEntity.getBody();
     }
 
+    /**
+     * Basic HTTP POST method.
+     *
+     * @param uri  URI to request information.
+     * @param body POST BODY
+     * @return Response body. Auth error, if securityCode doesn't match.
+     */
     public String httpPost(String uri, String body) {
-        HttpEntity<String> requestEnity = new HttpEntity<String>(body, httpHeaders);
-        ResponseEntity<String> responseEntity = rest.exchange(serverUri + uri, HttpMethod.POST, requestEnity, String.class);
+        System.out.println(httpHeaders.toString());
+        HttpEntity<String> requestEntity = new HttpEntity<>(body,httpHeaders);
+        ResponseEntity<String> responseEntity = rest.exchange(apiAddress + uri, HttpMethod.POST, requestEntity, String.class);
         setHttpStatus(responseEntity.getStatusCode());
+
         return responseEntity.getBody();
 
     }
@@ -57,5 +74,13 @@ public class RestClient {
 
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
+    }
+
+    public boolean internetConnection(int timeout) {
+        try {
+            return InetAddress.getByName(apiAddress.toString()).isReachable(timeout);
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
